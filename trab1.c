@@ -11,7 +11,17 @@
 int main(void) {
     
     // read input file with unknown dimension of an augmented matrix (A)
+    FILE *file;
+    file = fopen( const char * matrix_A, const char * r ); //ou fopen("matrix_A.txt", "r");
+    if (file) {
+        gets(file); //carrega uma fila ou melhor lista com índices de matrix?
+    }
+    fclose(file);
     
+    
+    float p[3][4] = {  {1, 3, -4}, {1, 1, -2}, {-1, -2, 5}, {8, 3, 1} };
+    
+        
     
     // identify the number of lines (i) and columns (j) of A
     
