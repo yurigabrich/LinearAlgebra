@@ -164,6 +164,7 @@ class Gauss(object):
         Makes the Gauss echelon method
         
         Returns: value of the variables (por enquanto matriz escalonada somente)
+                DEFINIR O QUE RETORNAR AINDA!
         '''
         
         # do echelon (recursive form)
@@ -186,4 +187,7 @@ class Gauss(object):
 INPUTED_MATRIX = 'matrixA.txt'
 #INPUTED_MATRIX = 'matrix-A.txt'
 #INPUTED_MATRIX = 'matrixB.txt'
-Gauss(INPUTED_MATRIX)
+test = Gauss(INPUTED_MATRIX)
+print(test.get_initial_matrix())
+print("Gauss result:")
+print(test.result())
