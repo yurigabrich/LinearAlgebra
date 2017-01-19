@@ -128,16 +128,17 @@ class Gauss(object):
         '''
         Initializes Gauss object. The only value needed is the matrix.
         
-        a Gauss object has three attributes:
-            self.matrix (list of string, the file selected on INPUTED_MATRIX above)
+        a Gauss object has four attributes:
+            self.matrix (list of string, the file selected on MATRIX)
             self.rows (list of list of floats, the matrix above converted to floats and organized by rows)
             self.cols (total number of columns in the matrix)
+            self.memory_rows (a copy of inputed matrix, because of memory address)
             
         Returns NOTHING!
         '''
         self.matrix = matrix
-        # read input file with unknown dimension of an augmented matrix (A)
-        self.rows, self.cols = load_matrix(INPUTED_MATRIX)
+        self.rows, self.cols = load_matrix(self.matrix) # read input file with unknown dimension of an augmented matrix (A)
+        self.memory_rows = copy.deepcopy(self.rows)
     
     
     def get_initial_matrix(self):
@@ -146,8 +147,8 @@ class Gauss(object):
         
         Returns: NOTHING! Only print the original matrix.
         '''
-        for x in range(len(self.rows)):
-            print(self.rows[x])
+        for x in range(len(self.memory_rows)):
+            print(self.memory_rows[x])
         
         
     def get_size(self):
