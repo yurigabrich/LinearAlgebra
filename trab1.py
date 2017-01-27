@@ -8,7 +8,11 @@ Auno: Yuri Bastos Gabrich
 
 #import string
 #import sys
-
+import copy
+import numpy as np
+import functools
+import operator as op
+import itertools
 
 def load_matrix(file_name):
     '''
@@ -65,10 +69,107 @@ def load_matrix(file_name):
         print('\n',"Hey, only numbers! Check row", str(i+1))
         
     #except SyntaxError: #seria parenteses, colchetes...
- 
+
+
+def ncr(n, k):
+    '''
+    The following program calculates nCr in an efficient manner
+    (compared to calculating factorials etc.)
+    fonte: http://stackoverflow.com/a/4941932/6770397
+    
+    Inputs:
+        - n = number of elements
+        - k = k-combinations of n
+    
+    Returns (int): Combination of n and k
+    '''
+    r = min(k, n-k)
+    if r == 0:
+        return 1
+    else:
+        numer = functools.reduce(op.mul, range(n, n-r, -1))
+        denom = functools.reduce(op.mul, range(1, r+1))
+        return numer//denom
+
+
+def is_square(matrix):
+    '''
+    Check if the matrix is square
+    
+    matrix (list of list of floats): matrix organized by lines (the 'rows' loaded)
+    
+    Returns all square submatrices with the highest order
+    '''
+    
+    # checking if it is a square matrix
+    if len(matrix) == len(matrix[0]):
+        return matrix
+    else:
+        #submatrices = []
+
+        # looking for the number of submatrices we can get
+        min_index = min(len(matrix),len(matrix[0]))
+        max_index = max(len(matrix),len(matrix[0]))
+        arrange = ncr(max_index, min_index) #talvez não precise mais disso!!
+        print(arrange)
+        c = itertools.combinations(np.transpose(matrix), 3)
+        count = 1
+        for k in c:
+            print(count)
+            print(np.transpose(k))
+            count+=1
+        
+        #for x in range(arrange):
+        #    submatrices.append()
+            
+        return arrange, c
+
+
+def solutionize(matrix, i, j):
+    '''
+    Indicates one of the three types of a solution in linear algebra system.
+    
+    matrix (list of list of floats): matrix organized by lines (the 'rows' loaded)
+    
+    Returns:
+            - boolean statement to indicate if the echelon must be made,
+            - string with type of solution
+    '''
+    A = []
+    
+    # checking if A is a square matrix
+    if len(A) == len(A[0]):
+        p_A = np.linalg.det(A)
+    else:
+        for x in range(len(matrix)):
+            A.append(matrix[x][:-1]) # eliminating the last column
+        #criar uma função para diminuir as colunas!!!
+    
+    # identify solution type
+    if p_A == i:
+        return True, "SPI"
+    else:
+        #p_M = numpy.linalg.det(matrix)
+        
+        # compare rank of A and M just once
+        postos = False#(p_A != p_M)
+        
+        if p_A == j:
+            if postos:
+                return False, "SI"
+            else:
+                return True, "SPD"
+        else: # must be only p_A < min{i, j}
+            if postos:
+                return False, "SI"
+            else:
+                return True, "SPI"
+
 
 def echelon(rows, cols, i, j, stop = False):
     '''
+    Does the echelon of a matrix of n-size, recursively
+    
     rows (list of list of floats): full matrix organized by lines
     cols (int): number of columns on matrix
     i (int): number of rows
@@ -114,11 +215,6 @@ def echelon(rows, cols, i, j, stop = False):
     
     else:
         return rows #echeloned
-    
-    
-    
-    
-
 
 
 #-------------------------------------------------------------------
@@ -137,8 +233,10 @@ class Gauss(object):
         Returns NOTHING!
         '''
         self.matrix = matrix
-        self.rows, self.cols = load_matrix(self.matrix) # read input file with unknown dimension of an augmented matrix (A)
+        # read input file with unknown dimension of an augmented matrix (A)
+        self.rows, self.cols = load_matrix(self.matrix)
         self.memory_rows = copy.deepcopy(self.rows)
+        return None
     
     
     def get_initial_matrix(self):
@@ -149,13 +247,17 @@ class Gauss(object):
         '''
         for x in range(len(self.memory_rows)):
             print(self.memory_rows[x])
+        return None
         
         
     def get_size(self):
         '''
         Returns: the number of rows (i) and columns (j) of the matrix
         '''
-        return len(self.rows), self.cols
+        is_square(self.rows)
+        
+        return #len(self.rows), self.cols
+        
     
     # how to identify the 'posto(A)'?
     
@@ -170,25 +272,37 @@ class Gauss(object):
         
         # do echelon (recursive form)
         i, j = self.get_size()
-        stepped_matrix = echelon(self.rows,self.cols,i,j)
         
-        #print()
-        #for x in range(len(stepped_matrix)):
-        #    print(stepped_matrix[x])
+        # verify solution
+        go, sys_type = solutionize(self.rows, i, j)
         
-        # do variables substitution (recursive form)
+        if go:
+            stepped_matrix = echelon(self.rows,self.cols,i,j)
+            
+            #print()
+            #for x in range(len(stepped_matrix)):
+            #    print(stepped_matrix[x])
+            
+            # do variables substitution (recursive form)
+            
+                # if (eq < var) --> print lambda
+                    
+                # else
+            
+            for x in range(len(stepped_matrix)):
+                print(stepped_matrix[x])
+        else:
+            print(sys_type)
         
-            # if (eq < var) --> print lambda
-                
-            # else
-        
-        return stepped_matrix
+        return None
 
 #-------------------------------------------------------------------
-INPUTED_MATRIX = 'matrixA.txt'
-#INPUTED_MATRIX = 'matrix-A.txt'
-#INPUTED_MATRIX = 'matrixB.txt'
-test = Gauss(INPUTED_MATRIX)
-print(test.get_initial_matrix())
-print("Gauss result:")
-print(test.result())
+MATRIX = 'matrixA.txt'
+#MATRIX = 'matrix-A.txt'
+#MATRIX = 'matrixB.txt'
+#MATRIX = 'matrixC.txt'
+test = Gauss(MATRIX)
+#print(test.get_initial_matrix())
+#print('\n', "Gauss result:")
+#print(test.result())
+print(test.get_size())
