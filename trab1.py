@@ -153,42 +153,44 @@ def solutionize(matrix, i, j):
     A = []
     for k in range(i):
         A.append(matrix[k][:-1])
-    
+        
     # calculates the determinante of A and get the rank(A)
     check_A, submatrix_A = is_square(A)
     p_A = det_matrix(check_A, submatrix_A)
     
+    # calculates the determinante of M and get the rank(M)
+    check_M, submatrix_M = is_square(matrix)
+    p_M = det_matrix(check_M, submatrix_M)
+    
+    # compare rank of A and M just once
+    postos = (p_A == p_M)
+    
     # identify solution type
-    if p_A == i:
-        return True, "SPI"
-    else:
-        # calculates the determinante of M and get the rank(M)
-        check_M, submatrix_M = is_square(matrix)
-        p_M = det_matrix(check_M, submatrix_M)
-        
-        # compare rank of A and M just once
-        postos = (p_A != p_M)
-        
-        if p_A == j:
+    if p_A == min(i,j-1): # j-1 = number of columns of matrix A
+        if i == j-1:
+            return True, "SPD"
+        elif i < j-1:
+            return True, "SPI"
+        else: # i > j-1
             if postos:
-                return False, "SI"
-            else:
                 return True, "SPD"
-        else: # must be only p_A < min{i, j}
-            if postos:
-                return False, "SI"
             else:
-                return True, "SPI"
+                return False, "SI"
+    else: #p_A < min{i,j-1}
+        if postos:
+            return True, "SPI"
+        else:
+            return False, "SI"
 
 
 def echelon(rows, cols, i, j, stop = False):
     '''
     Does the echelon of a matrix of n-size, recursively
     
-    rows (list of list of floats): full matrix organized by lines
-    cols (int): number of columns on matrix
-    i (int): number of rows
-    j (int): number of columns
+    - rows (list of list of floats): full matrix organized by lines
+    - cols (int): number of columns on matrix
+    - i (int): number of rows
+    - j (int): number of columns
     
     Returns: stepped matrix organized as a list of list of floats
     '''
@@ -229,7 +231,30 @@ def echelon(rows, cols, i, j, stop = False):
         return echelon(rows, cols, i-1, j-1, stop)
     
     else:
-        return rows #echeloned
+        return rows #steped
+
+
+def calc_var(row, pos, variables_x):
+    '''
+    Finds the value of the unkown by simple math accordingly with row specs
+    
+    - rows (list of floats): desired line of the echelon matrix
+    - pos (int): column index of the unkown
+    - variables_x (list of floats): value of the unknowns
+    
+    Returns: value of the unkown (float)
+    '''
+    value = row[-1]
+
+    #print('\n', value, variables_x, end='')
+
+    for k in range(len(row)-1, pos, -1):
+        
+        value -= (row[k] * variables_x[len(row) -1 -k])
+
+        #print('', value, k, '\n')
+
+    return round(value, 2)
 
 
 #-------------------------------------------------------------------
@@ -269,12 +294,7 @@ class Gauss(object):
         '''
         Returns: the number of rows (i) and columns (j) of the matrix
         '''
-        print(solutionize(self.rows, len(self.rows), self.cols))
-        
-        return #len(self.rows), self.cols
-        
-    
-    # how to identify the 'posto(A)'?
+        return len(self.rows), self.cols
     
         
     def result(self):
@@ -285,39 +305,51 @@ class Gauss(object):
                 DEFINIR O QUE RETORNAR AINDA!
         '''
         
-        # do echelon (recursive form)
+        # gets the size of the augmented matrix
         i, j = self.get_size()
         
         # verify solution
-        go, sys_type = solutionize(self.rows, i, j)
+        do_gauss, sys_type = solutionize(self.rows, i, j)
         
-        if go:
-            stepped_matrix = echelon(self.rows,self.cols,i,j)
+        # do echelon
+        if do_gauss:
+            stepped_matrix = echelon(self.rows, self.cols, i, j)
+            variables_x = [0]*(j-1) #(j-1) = number of columns of matrix A
             
-            #print()
-            #for x in range(len(stepped_matrix)):
-            #    print(stepped_matrix[x])
+            if sys_type == "SPD":
+                for k in range(i, 0, -1):
+                    variables_x[k-1] = calc_var(stepped_matrix[k-1], k-1, variables_x)
+                    #print(variables_x)
+                
+            else: #sys_type == "SPI"            
+                # do variables substitution (recursive form)
+                    # if (eq < var) --> print lambda
+                        # (i , 0, -1)
+                    # else
+                #calc_var(stepped_matrix[0],0)
+                # update set of variables
+                for k in range(i):                    
+                    variables_x.append(stepped_matrix[k-1][k-1])    
             
-            # do variables substitution (recursive form)
-            
-                # if (eq < var) --> print lambda
-                    
-                # else
-            
+            # printing final solution
+            print("", sys_type, "=", variables_x)
+            print("echelon form:")
             for x in range(len(stepped_matrix)):
                 print(stepped_matrix[x])
+        
         else:
-            print(sys_type)
+            print("", sys_type)
         
         return None
 
 #-------------------------------------------------------------------
-#MATRIX = 'matrixA.txt'
-#MATRIX = 'matrix-A.txt'
-#MATRIX = 'matrixB.txt'
-MATRIX = 'matrixC.txt'
-test = Gauss(MATRIX)
-print(test.get_initial_matrix())
-#print('\n', "Gauss result:")
-#print(test.result())
-print(test.get_size())
+M = 'matrix_SPD.txt'
+#M = 'matrix_SPI.txt'
+#M = 'matrix_SI.txt'
+#M = 'matrixB.txt'
+
+test = Gauss(M)
+test.get_initial_matrix()
+print('\n', "Gauss result:", end="")
+test.result()
+#print(test.get_size())
