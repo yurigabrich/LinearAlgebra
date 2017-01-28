@@ -98,31 +98,43 @@ def is_square(matrix):
     
     matrix (list of list of floats): matrix organized by lines (the 'rows' loaded)
     
-    Returns all square submatrices with the highest order
+    Returns:
+            - boolean indicating initial condition about square behaviour
+            - list of list with all square submatrices with the highest order
     '''
     
     # checking if it is a square matrix
     if len(matrix) == len(matrix[0]):
-        return matrix
+        return True, matrix
     else:
-        #submatrices = []
-
         # looking for the number of submatrices we can get
         min_index = min(len(matrix),len(matrix[0]))
-        max_index = max(len(matrix),len(matrix[0]))
-        arrange = ncr(max_index, min_index) #talvez não precise mais disso!!
-        print(arrange)
-        c = itertools.combinations(np.transpose(matrix), 3)
-        count = 1
-        for k in c:
-            print(count)
-            print(np.transpose(k))
-            count+=1
         
-        #for x in range(arrange):
-        #    submatrices.append()
+        submatrices = itertools.combinations(np.transpose(matrix), min_index)
             
-        return arrange, c
+        return False, submatrices
+
+
+def det_matrix(check, submatrix):
+    '''
+    Calculates the determinant(s) of submatrix(ces) accordingly with the
+    previous information about dimension of the main matrix (square or not).
+    
+    Returns (int): the order of the submatrix
+    '''
+    
+    if check:
+        det = np.linalg.det(submatrix)
+        order = len(list(submatrix))
+    else:
+        det = 0
+        for k in submatrix:
+            det += np.linalg.det(k)
+            if k != 0:
+                order = len(list(submatrix))
+                break
+    
+    return order
 
 
 def solutionize(matrix, i, j):
@@ -130,29 +142,32 @@ def solutionize(matrix, i, j):
     Indicates one of the three types of a solution in linear algebra system.
     
     matrix (list of list of floats): matrix organized by lines (the 'rows' loaded)
+    i (int): number of rows of the matrix 
+    j (int): number of columns of the matrix 
     
     Returns:
             - boolean statement to indicate if the echelon must be made,
             - string with type of solution
     '''
+    # first, find A
     A = []
+    for k in range(i):
+        A.append(matrix[k][:-1])
     
-    # checking if A is a square matrix
-    if len(A) == len(A[0]):
-        p_A = np.linalg.det(A)
-    else:
-        for x in range(len(matrix)):
-            A.append(matrix[x][:-1]) # eliminating the last column
-        #criar uma função para diminuir as colunas!!!
+    # calculates the determinante of A and get the rank(A)
+    check_A, submatrix_A = is_square(A)
+    p_A = det_matrix(check_A, submatrix_A)
     
     # identify solution type
     if p_A == i:
         return True, "SPI"
     else:
-        #p_M = numpy.linalg.det(matrix)
+        # calculates the determinante of M and get the rank(M)
+        check_M, submatrix_M = is_square(matrix)
+        p_M = det_matrix(check_M, submatrix_M)
         
         # compare rank of A and M just once
-        postos = False#(p_A != p_M)
+        postos = (p_A != p_M)
         
         if p_A == j:
             if postos:
@@ -254,7 +269,7 @@ class Gauss(object):
         '''
         Returns: the number of rows (i) and columns (j) of the matrix
         '''
-        is_square(self.rows)
+        print(solutionize(self.rows, len(self.rows), self.cols))
         
         return #len(self.rows), self.cols
         
@@ -297,12 +312,12 @@ class Gauss(object):
         return None
 
 #-------------------------------------------------------------------
-MATRIX = 'matrixA.txt'
+#MATRIX = 'matrixA.txt'
 #MATRIX = 'matrix-A.txt'
 #MATRIX = 'matrixB.txt'
-#MATRIX = 'matrixC.txt'
+MATRIX = 'matrixC.txt'
 test = Gauss(MATRIX)
-#print(test.get_initial_matrix())
+print(test.get_initial_matrix())
 #print('\n', "Gauss result:")
 #print(test.result())
 print(test.get_size())
