@@ -33,37 +33,37 @@ def load_matrix(file_name):
     lines = in_file.readlines() # line delimiter \n
     
     try:
-        rows = []
+        aug_matrix = []
         for i in range(len(lines)):
-            rows.append(lines[i].split()) #column delimiter ' ' --> single space
+            aug_matrix.append(lines[i].split()) #column delimiter ' ' --> single space
                 
             # converting a row of strings to a row of floats
-            for elem in range(len(rows[i])):
-                rows[i][elem] = float(rows[i][elem])
+            for elem in range(len(aug_matrix[i])):
+                aug_matrix[i][elem] = float(aug_matrix[i][elem])
                 
         # column: size of the first row
-        cols = len(rows[0])
+        cols = len(aug_matrix[0])
 
         # cheking if some element was forgotten
-        for k in range(len(rows)):
-            if len(rows[k]) != cols:
+        for k in range(len(aug_matrix)):
+            if len(aug_matrix[k]) != cols:
                 raise IndexError
         
         # end of load_matrix, if everything is right
-        print('\n', 'Matrix', len(rows), 'x', cols, 'loaded.')
+        print('\n', 'Matrix', len(aug_matrix), 'x', cols, 'loaded.')
         in_file.close()
-        return rows, cols
+        return aug_matrix, cols
         
     except IndexError:
         missed_element = {} # dictionary{ cols: rows }
-        for n in range(len(rows)):
-            missed_element[len(rows[n])] = n
+        for n in range(len(aug_matrix)):
+            missed_element[len(aug_matrix[n])] = n
         
         issued_row = missed_element.get(min(missed_element.keys()))
         
         print('\n',"Ops! Apparently you've eaten some element(s) of the matrix.")
         print(" Check row", str(1 + issued_row)+":")
-        print('    ', rows[issued_row])
+        print('    ', aug_matrix[issued_row])
         
     except ValueError:
         print('\n',"Hey, only numbers! Check row", str(i+1))
@@ -71,7 +71,7 @@ def load_matrix(file_name):
     #except SyntaxError: #seria parenteses, colchetes...
 
 
-def ncr(n, k):
+def ncr(n, k): #talvez seja apagado
     '''
     The following program calculates nCr in an efficient manner
     (compared to calculating factorials etc.)
@@ -96,7 +96,7 @@ def is_square(matrix):
     '''
     Check if the matrix is square
     
-    matrix (list of list of floats): matrix organized by lines (the 'rows' loaded)
+    matrix (list of list of floats): matrix organized by rows
     
     Returns:
             - boolean indicating initial condition about square behaviour
@@ -111,27 +111,27 @@ def is_square(matrix):
         min_index = min(len(matrix),len(matrix[0]))
         
         submatrices = itertools.combinations(np.transpose(matrix), min_index)
-            
+        
         return False, submatrices
 
 
-def det_matrix(check, submatrix):
+def det_matrix(check, submatrices):
     '''
-    Calculates the determinant(s) of submatrix(ces) accordingly with the
+    Calculates the determinants of submatrices accordingly with the
     previous information about dimension of the main matrix (square or not).
     
-    Returns (int): the order of the submatrix
+    Returns (int): the order of the submatrices
     '''
     
     if check:
-        det = np.linalg.det(submatrix)
-        order = len(list(submatrix))
+        det = np.linalg.det(submatrices)
+        order = len(list(submatrices))
     else:
         det = 0
-        for k in submatrix:
+        for k in submatrices:
             det += np.linalg.det(k)
             if k != 0:
-                order = len(list(submatrix))
+                order = len(list(submatrices))
                 break
     
     return order
@@ -141,7 +141,7 @@ def solutionize(matrix, i, j):
     '''
     Indicates one of the three types of a solution in linear algebra system.
     
-    matrix (list of list of floats): matrix organized by lines (the 'rows' loaded)
+    matrix (list of list of floats): matrix organized by rows
     i (int): number of rows of the matrix 
     j (int): number of columns of the matrix 
     
@@ -183,62 +183,66 @@ def solutionize(matrix, i, j):
             return False, "SI"
 
 
-def echelon(rows, cols, i, j, stop = False):
+def echelon(aug_matrix, i, j, stop = False):
     '''
-    Does the echelon of a matrix of n-size, recursively
+    Does the echelon of a matrix of n-size, recursively.
+    Put the greater element as pivot for each row.
+    Start to do echelon from top to bottom.
     
-    - rows (list of list of floats): full matrix organized by lines
-    - cols (int): number of columns on matrix
-    - i (int): number of rows
-    - j (int): number of columns
+    Inputs:
+        - aug_matrix (list of list of floats): full matrix organized by lines
+        - i (int): number of rows of aug_matrix
+        - j (int): number of columns of aug_matrix
     
     Returns: stepped matrix organized as a list of list of floats
     '''
     if not stop:
-        # identify pivot (PIV)
-        pivj = cols - j
-        pivi = len(rows) - i
-        PIV = rows[pivi][pivj]
+        # identify pivot element and position
+        i_turn = len(aug_matrix) - i
+        j_turn = len(aug_matrix[0]) - j
+        pivot = aug_matrix[i_turn][j_turn]
         
-        # look for the greatest (little) item on the pivot column, and define the
-        # corresponding row as main row (maybe because of computacional error problem)   
-        for n in range(pivi + 1, len(rows)):
+        # arrange rows positions accordingly with non-null initial pivot
+        for n in range(i_turn + 1, i):
             #change line positions if needed        
-            if rows[n][pivj] > PIV:
-                temp_row = rows[n].copy()
-                rows[n] = rows[pivi]          
-                rows[pivi] = temp_row
-                PIV = rows[pivi][pivj] #update pivot
-                
-        # look for values non-null on the left of pivot item and clean then
-        for x in range(pivj):
-            if (rows[pivi][pivj - x]) != 0.00:
+            if aug_matrix[n][j_turn] > pivot:
+                temp_row = aug_matrix[n].copy()
+                aug_matrix[n] = aug_matrix[i_turn].copy()
+                aug_matrix[i_turn] = temp_row.copy()
+                # UPDATE PIVOT
+                pivot = aug_matrix[i_turn][j_turn]
+        
+        # look for values non-null on the left of pivot item and clean them
+        for k in range(j_turn):
+            if (aug_matrix[i_turn][k]) != 0.00:
                 # change the value of the entirely row
-                X = rows[pivi][x]
-                for n in range(pivj):
-                    rows[pivi][n] -= X * abs(rows[x][n])
-            PIV = rows[pivi][pivj] #update pivot
-
+                num = aug_matrix[i_turn][k]
+                denom = aug_matrix[k][k]
+                for x in range(len(aug_matrix[0])): # because 'j' changes recursively!
+                    aug_matrix[i_turn][x] -= abs( aug_matrix[k][x] * (num / denom))
+            # UPDATE PIVOT
+            pivot = aug_matrix[i_turn][j_turn]
+        
         # make pivot element be a unit,
         # as well as change the value of the entirely row
-        for n in range(cols):
-            rows[pivi][n] = round(rows[pivi][n] / PIV, 2)
+        for k in range(len(aug_matrix[0])): # because 'j' changes recursively!
+            aug_matrix[i_turn][k] = round(aug_matrix[i_turn][k] / pivot, 2)
         
         #stop criterion
-        if (min(i,j)-1) == 0:
+        if (min(i_turn,j_turn)-1) == 0:
             stop = True
         
-        return echelon(rows, cols, i-1, j-1, stop)
+        return echelon(aug_matrix, i-1, j-1, stop)
     
     else:
-        return rows #steped
+        return aug_matrix #stepped
 
 
 def calc_var(row, pos, variables_x):
     '''
     Finds the value of the unkown by simple math accordingly with row specs
     
-    - rows (list of floats): desired line of the echelon matrix
+    - row (list of floats): desired line of the echelon matrix
     - pos (int): column index of the unkown
     - variables_x (list of floats): value of the unknowns
     
@@ -266,16 +270,16 @@ class Gauss(object):
         
         a Gauss object has four attributes:
             self.matrix (list of string, the file selected on MATRIX)
-            self.rows (list of list of floats, the matrix above converted to floats and organized by rows)
+            self.aug_matrix (list of list of floats, the matrix above converted to floats and organized by rows)
             self.cols (total number of columns in the matrix)
-            self.memory_rows (a copy of inputed matrix, because of memory address)
+            self.memory_aug_matrix (a copy of inputed matrix, because of memory address)
             
         Returns NOTHING!
         '''
         self.matrix = matrix
         # read input file with unknown dimension of an augmented matrix (A)
-        self.rows, self.cols = load_matrix(self.matrix)
-        self.memory_rows = copy.deepcopy(self.rows)
+        self.aug_matrix, self.cols = load_matrix(self.matrix)
+        self.memory_aug_matrix = copy.deepcopy(self.aug_matrix)
         return None
     
     
@@ -285,16 +289,16 @@ class Gauss(object):
         
         Returns: NOTHING! Only print the original matrix.
         '''
-        for x in range(len(self.memory_rows)):
-            print(self.memory_rows[x])
+        for x in range(len(self.memory_aug_matrix)):
+            print(self.memory_aug_matrix[x])
         return None
         
         
     def get_size(self):
         '''
-        Returns: the number of rows (i) and columns (j) of the matrix
+        Returns: the number of rows (i) and columns (j) of the aug_matrix
         '''
-        return len(self.rows), self.cols
+        return len(self.aug_matrix), self.cols
     
         
     def result(self):
@@ -305,20 +309,20 @@ class Gauss(object):
                 DEFINIR O QUE RETORNAR AINDA!
         '''
         
-        # gets the size of the augmented matrix
+        # gets the real size of the augmented matrix, not index of the 'list' argument
         i, j = self.get_size()
         
         # verify solution
-        do_gauss, sys_type = solutionize(self.rows, i, j)
+        do_gauss, sys_type = solutionize(self.aug_matrix, i, j)
         
         # do echelon
         if do_gauss:
-            stepped_matrix = echelon(self.rows, self.cols, i, j)
+            step_matrix = echelon(self.aug_matrix, i, j)
             variables_x = [0]*(j-1) #(j-1) = number of columns of matrix A
             
             if sys_type == "SPD":
                 for k in range(i, 0, -1):
-                    variables_x[k-1] = calc_var(stepped_matrix[k-1], k-1, variables_x)
+                    variables_x[k-1] = calc_var(step_matrix[k-1], k-1, variables_x)
                     #print(variables_x)
                 
             else: #sys_type == "SPI"            
@@ -326,16 +330,16 @@ class Gauss(object):
                     # if (eq < var) --> print lambda
                         # (i , 0, -1)
                     # else
-                #calc_var(stepped_matrix[0],0)
+                #calc_var(step_matrix[0],0)
                 # update set of variables
                 for k in range(i):                    
-                    variables_x.append(stepped_matrix[k-1][k-1])    
+                    variables_x.append(step_matrix[k-1][k-1])    
             
             # printing final solution
             print("", sys_type, "=", variables_x)
             print("echelon form:")
-            for x in range(len(stepped_matrix)):
-                print(stepped_matrix[x])
+            for x in range(len(step_matrix)):
+                print(step_matrix[x])
         
         else:
             print("", sys_type)
