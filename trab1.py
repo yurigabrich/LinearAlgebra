@@ -223,11 +223,6 @@ def echelon(aug_matrix, i, j, stop = False):
             # UPDATE PIVOT
             pivot = aug_matrix[i_turn][j_turn]
         
-        # make pivot element be a unit,
-        # as well as change the value of the entirely row
-        for k in range(len(aug_matrix[0])): # because 'j' changes recursively!
-            aug_matrix[i_turn][k] = round(aug_matrix[i_turn][k] / pivot, 2)
-        
         #stop criterion
         if (min(i_turn,j_turn)-1) == 0:
             stop = True
