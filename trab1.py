@@ -10,8 +10,8 @@ Auno: Yuri Bastos Gabrich
 #import sys
 import copy
 import numpy as np
-import functools
-import operator as op
+#import functools
+#import operator as op
 import itertools
 
 def load_matrix(file_name):
@@ -71,70 +71,94 @@ def load_matrix(file_name):
     #except SyntaxError: #seria parenteses, colchetes...
 
 
-def ncr(n, k): #talvez seja apagado
+def split_matrix(matrix, number):
     '''
-    The following program calculates nCr in an efficient manner
-    (compared to calculating factorials etc.)
-    fonte: http://stackoverflow.com/a/4941932/6770397
-    
-    Inputs:
-        - n = number of elements
-        - k = k-combinations of n
-    
-    Returns (int): Combination of n and k
+    Divides a matrix in several submatrices accordingly to defined number.
+    Returns: a list of submatrices
     '''
-    r = min(k, n-k)
-    if r == 0:
-        return 1
-    else:
-        numer = functools.reduce(op.mul, range(n, n-r, -1))
-        denom = functools.reduce(op.mul, range(1, r+1))
-        return numer//denom
+    return itertools.combinations(np.transpose(matrix), number)
 
 
-def is_square(matrix):
+def squares(matrix):
     '''
-    Check if the matrix is square
+    Check if the matrix is square and returns a list of list with all
+    square submatrices with the highest order.
     
     matrix (list of list of floats): matrix organized by rows
-    
-    Returns:
-            - boolean indicating initial condition about square behaviour
-            - list of list with all square submatrices with the highest order
     '''
-    
     # checking if it is a square matrix
     if len(matrix) == len(matrix[0]):
-        return True, matrix
+        return [matrix]
     else:
         # looking for the number of submatrices we can get
         min_index = min(len(matrix),len(matrix[0]))
-        
-        submatrices = itertools.combinations(np.transpose(matrix), min_index)
-        
-        return False, submatrices
+        return split_matrix(matrix, min_index)
 
 
-def det_matrix(check, submatrices):
+def catch_zero(submatrix, dim):
     '''
-    Calculates the determinants of submatrices accordingly with the
-    previous information about dimension of the main matrix (square or not).
+    Looks for null, equal or proportional rows (or columns).
     
-    Returns (int): the order of the submatrices
+    - submatrix = biggest square submatrix
+    - dim = dimension of the square submatrix
+
+    Returns: boolean statement indicating if the determinant will be zero.
     '''
+    for k in range(dim):
+            # look for null rows
+            count_zero = submatrix[k].count(0)
+            if count_zero == dim:
+                # det = 0 DETECTED!
+                return True
+                
+            for s in range(k+1, dim, 1):
+                # look for equal rows
+                if submatrix[k] == submatrix[s]:
+                    # det = 0 DETECTED!
+                    return True
+            
+                # look for ratio number between rows
+                ratio = submatrix[k][0] % submatrix[s][0]
+                remainder = 0
+                for t in range(k+1, dim, 1):
+                    # if one is multiple of another
+                    if (submatrix[s][t] == ratio * submatrix[k][t]):
+                        remainder += 1
+                if remainder == dim:
+                    # det = 0 DETECTED!
+                    return True
     
-    if check:
-        det = np.linalg.det(submatrices)
-        order = len(list(submatrices))
+    return False # det != 0
+
+
+def indirect_det(submatrix):
+    '''
+    Indicates if the determinant of a submatrix (can be a list of submatrices)
+    will be zero or not, and returns the rank of the submatrix.
+    '''
+        
+    dim = len(submatrix[0])
+    if dim != 1:
+        count_zero_det = 0
+        
+        for square_submatrix in submatrix:
+            Tsubmatrix = np.transpose(square_submatrix)
+            
+            is_det_zero = catch_zero(square_submatrix, dim) or catch_zero(Tsubmatrix, dim)
+            if is_det_zero:
+                count_zero_det += 1
+    
+        if count_zero_det == len(submatrix):
+            #get NEW submatrices (with lowest dimension) and do everything again
+            new_submatrices = []
+            for each_submatrix in submatrix:
+                new_submatrices.extend(split_matrix(each_submatrix, dim-1)) # REVER!!
+            return indirect_det(new_submatrices)
+        else:
+            return dim
+    
     else:
-        det = 0
-        for k in submatrices:
-            det += np.linalg.det(k)
-            if k != 0:
-                order = len(list(submatrices))
-                break
-    
-    return order
+        return 1
 
 
 def solutionize(matrix, i, j):
@@ -145,42 +169,40 @@ def solutionize(matrix, i, j):
     i (int): number of rows of the matrix 
     j (int): number of columns of the matrix 
     
-    Returns:
-            - boolean statement to indicate if the echelon must be made,
-            - string with type of solution
+    Returns: string with type of solution
     '''
     # first, find A
     A = []
     for k in range(i):
         A.append(matrix[k][:-1])
         
-    # calculates the determinante of A and get the rank(A)
-    check_A, submatrix_A = is_square(A)
-    p_A = det_matrix(check_A, submatrix_A)
+    # calculates the determinant of A and get the rank(A)
+    submatrix_A = squares(A)
+    p_A = indirect_det(submatrix_A)
     
-    # calculates the determinante of M and get the rank(M)
-    check_M, submatrix_M = is_square(matrix)
-    p_M = det_matrix(check_M, submatrix_M)
+    # calculates the determinant of M and get the rank(M)
+    submatrix_M = squares(matrix)
+    p_M = indirect_det(submatrix_M)
     
     # compare rank of A and M just once
     postos = (p_A == p_M)
     
-    # identify solution type
+    # identify solution type (REVER)
     if p_A == min(i,j-1): # j-1 = number of columns of matrix A
         if i == j-1:
-            return True, "SPD"
+            return "SPD"
         elif i < j-1:
-            return True, "SPI"
+            return "SPI"
         else: # i > j-1
             if postos:
-                return True, "SPD"
+                return "SPD"
             else:
-                return False, "SI"
+                return "SI"
     else: #p_A < min{i,j-1}
         if postos:
-            return True, "SPI"
+            return "SPI"
         else:
-            return False, "SI"
+            return "SI"
 
 
 def echelon(aug_matrix, i, j, stop = False):
@@ -343,9 +365,13 @@ class Gauss(object):
 
 #-------------------------------------------------------------------
 M = 'matrix_SPD.txt'
+#M = 'matrix_SPD_2.txt'
 #M = 'matrix_SPI.txt'
+#M = 'matrix_SPI_2.txt'
 #M = 'matrix_SI.txt'
-#M = 'matrixB.txt'
+#M = 'matrix_SI_2.txt'
+#M = 'matrix_grande_cheia.txt'
+#M = 'matrix_grande_vazia.txt'
 
 test = Gauss(M)
 test.get_initial_matrix()
