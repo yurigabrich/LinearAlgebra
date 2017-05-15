@@ -190,7 +190,7 @@ def catch_zeros(submatrix, dim):
 
 def indirect_det(submatrix):
     '''
-    Looks for null determinant of a submatrix
+    Looks for null determinant of a submatrix.
     
     Returns: False for det != 0, True for det == 0
     '''    
@@ -208,24 +208,25 @@ def indirect_det(submatrix):
     return (check_rows or check_cols)
 
 ########################################################################################################
-def rank():
+def rank(matrix):
     '''
     Identify the rank of a matrix analyzing the determinants of its submatrices.
 
-    Input: list of determinants conditions (boolean).
     Returns: the rank of a matrix (integer).
     '''
-    if count_null_dets == len(submatrix): # If all dets are nulls
-        if (dim-1) == 1:
-            return 1
-        else:
-            # Get NEW submatrices (with lowest dimension) and do everything again
-            new_submatrices = []
-            for each_submatrix in submatrix:
-                new_submatrices.extend(split_matrix(each_submatrix, dim-1)) # REVER!!
-            return "ERROR MSG: recursive mode" #indirect_det(new_submatrices)
+    
+    submatrices, n = squares(matrix)
+    is_rank_defined = False
+    
+    for submatrix in submatrices:
+        is_rank_defined *= indirect_det(submatrix) #pode dar errado ainda, verificar AND e OR
+        
+    if is_rank_defined:
+        return n
     else:
-        return dim
+        #FALTA DETERMINAR CONDIÇÃO DE PARADA!
+        #for submatrix in submatrices:
+        #    is_rank_defined *= rank(submatrix)
 ########################################################################################################        
         
 def solutionize(matrix, i, j):
