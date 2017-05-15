@@ -144,8 +144,8 @@ def squares(matrix):
         return [matrix]
     else:
         # looking for the highest number of square submatrices we can get
-        min_index = min(len(matrix),len(matrix[0]))
-        return combinations(matrix, min_index)
+        n = min(len(matrix),len(matrix[0]))
+        return combinations(matrix, n), n
 
 
 def catch_zeros(submatrix, dim):
