@@ -81,9 +81,9 @@ def T(matrix):
     return result
 
 
-def split_matrix(matrix, arrangement):
+def split_matrix(matrix, n):
     '''
-    Divides a matrix in several square submatrices accordingly to arrangement.
+    Divides a matrix in several square submatrices accordingly to n (desired order).
     It always uses the pattern of rows greater than columns.
     
     Returns: a generator of lists:
@@ -94,42 +94,43 @@ def split_matrix(matrix, arrangement):
     '''  
     if len(matrix[0]) > len(matrix):
         matrix = T(matrix)
-        
-    r = arrangement   
+
     pool = tuple(matrix)
-    n = len(pool)
-    if r > n:
+    lp = len(pool)
+    if n > lp:
         return #NOTHING!
-    indices = list(range(r))
+    indices = list(range(n))
     yield list(pool[i] for i in indices)
     while True:
-        for i in reversed(range(r)):
-            if indices[i] != i + n - r:
+        for i in reversed(range(n)):
+            if indices[i] != i + lp - n:
                 break
         else:
             return
         indices[i] += 1
-        for j in range(i+1, r):
+        for j in range(i+1, n):
             indices[j] = indices[j-1] + 1
         
         yield list(pool[i] for i in indices)
-    
+           
 
-def combinations(matrix, arrangement):
+def combinations(matrix, n):
     '''
-    All combinations of each row, with the size of a square matrix specified.
+    Divides a matrix in several square submatrices accordingly to n (desired order).
+    It always uses the pattern of rows greater than columns.
     
-    Returns: a list of square submatrices:
+    Returns: a list of square submatrices with order n:
                             combinations([['a','b','c'],['d','e','f']], 2)
                             --> [[['a','d'],['b','e']],
                                  [['a','d'],['c','f']],
                                  [['b','e'],['c','f']]]
     '''
+    
     submatrices = []
-    for k in split_matrix(matrix, arrangement):
+    for k in split_matrix(matrix, n):
         submatrices.append(k)
     return submatrices
-    
+   
 
 def squares(matrix):
     '''
@@ -142,12 +143,12 @@ def squares(matrix):
     if len(matrix) == len(matrix[0]):
         return [matrix]
     else:
-        # looking for the number of submatrices we can get
+        # looking for the highest number of square submatrices we can get
         min_index = min(len(matrix),len(matrix[0]))
         return combinations(matrix, min_index)
 
 
-def catch_zero(submatrix, dim):
+def catch_zeros(submatrix, dim):
     '''
     Looks for null, equal or proportional rows in ONE matrix.
     
@@ -169,8 +170,7 @@ def catch_zero(submatrix, dim):
                 # det = 0 DETECTED!
                 return True
             
-            # look for ratio number between rows
-            # to avoid zero division:
+            # look for ratio number between rows to avoid zero division:
             max_element = max(submatrix[s])
             index = submatrix[s].index(max_element)
             ratio = submatrix[k][index] % submatrix[s][index]
@@ -186,31 +186,35 @@ def catch_zero(submatrix, dim):
                 return True
     
     return False # det != 0
-
+    
 
 def indirect_det(submatrix):
     '''
-    Looks for null determinants in a list of submatrices and identify the rank.
+    Looks for null determinant of a submatrix
     
-    Returns: rank of the submatrix.
+    Returns: False for det != 0, True for det == 0
     '''    
-    dim = len(submatrix[0])
-    count_null_dets = 0
+    dim = len(submatrix) # dimension of submatrix
     
-    for square_submatrix in submatrix:            
-        # Look for null determinants by row analysis
-        check_rows = catch_zero(square_submatrix, dim)
-        
-        # Look for null determinants by column analysis
-        check_cols = False
-        if not check_rows: # If det is already null, no need to analyze cols
-            Tsubmatrix = T(square_submatrix)
-            check_cols = catch_zero(Tsubmatrix, dim)
-        
-        is_det_zero = (check_rows or check_cols)
-        if is_det_zero:
-            count_null_dets += 1
+    # Look for null determinants by row analysis
+    check_rows = catch_zeros(submatrix, dim)
+    
+    # Look for null determinants by column analysis
+    check_cols = False
+    if not check_rows: # If det is already null, no need to analyze cols
+        Tsubmatrix = T(submatrix)
+        check_cols = catch_zeros(Tsubmatrix, dim)
+    
+    return (check_rows or check_cols)
 
+########################################################################################################
+def rank():
+    '''
+    Identify the rank of a matrix analyzing the determinants of its submatrices.
+
+    Input: list of determinants conditions (boolean).
+    Returns: the rank of a matrix (integer).
+    '''
     if count_null_dets == len(submatrix): # If all dets are nulls
         if (dim-1) == 1:
             return 1
@@ -222,8 +226,8 @@ def indirect_det(submatrix):
             return "ERROR MSG: recursive mode" #indirect_det(new_submatrices)
     else:
         return dim
-
-
+########################################################################################################        
+        
 def solutionize(matrix, i, j):
     '''
     Indicates one of the three types of a solution.
