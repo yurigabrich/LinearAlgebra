@@ -216,17 +216,23 @@ def rank(matrix):
     '''
     
     submatrices, n = squares(matrix)
-    is_rank_defined = False
+    
+    #If the determinant of at least one of the sub-matrices is non-zero, we already found the rank.
+    #In other words:  if det != 0 (False) /--> rank = n
+    
+    is_det_zero = False
     
     for submatrix in submatrices:
-        is_rank_defined *= indirect_det(submatrix) #pode dar errado ainda, verificar AND e OR
+        is_det_zero = is_det_zero | indirect_det(submatrix)
         
-    if is_rank_defined:
+    if not is_det_zero:
         return n
-    else:
-        #FALTA DETERMINAR CONDIÇÃO DE PARADA!
-        #for submatrix in submatrices:
-        #    is_rank_defined *= rank(submatrix)
+    elif n == 1:
+        return 1
+    #else:
+    # Ainda falta determinar a parada.
+    #    for submatrix in submatrices:
+    #        rank(submatrix)
 ########################################################################################################        
         
 def solutionize(matrix, i, j):
