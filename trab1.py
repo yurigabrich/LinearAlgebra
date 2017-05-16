@@ -141,7 +141,7 @@ def squares(matrix):
     '''
     # checking if it is a square matrix
     if len(matrix) == len(matrix[0]):
-        return [matrix]
+        return [matrix], len(matrix)
     else:
         # looking for the highest number of square submatrices we can get
         n = min(len(matrix),len(matrix[0]))
@@ -216,15 +216,17 @@ def rank(matrix):
     '''
     
     submatrices, n = squares(matrix)
-    
+    print(n)
     #If the determinant of at least one of the sub-matrices is non-zero, we already found the rank.
     #In other words:  if det != 0 (False) /--> rank = n
     
     is_det_zero = False
     
     for submatrix in submatrices:
-        is_det_zero = is_det_zero | indirect_det(submatrix)
-        
+        is_det_zero = is_det_zero or indirect_det(submatrix)
+        print(submatrix, is_det_zero)
+    print(is_det_zero, n)
+    
     if not is_det_zero:
         return n
     elif n == 1:
@@ -251,12 +253,12 @@ def solutionize(matrix, i, j):
         A.append(matrix[k][:-1])
         
     # Get the rank(A) by determinant
-    submatrix_A = squares(A)
-    rank_A = indirect_det(submatrix_A)
+    #submatrix_A = squares(A)
+    rank_A = rank(A)#indirect_det(submatrix_A)
     
     # Get the rank(M) by determinant
-    submatrix_M = squares(matrix)
-    rank_M = indirect_det(submatrix_M)
+    #submatrix_M = squares(matrix)
+    rank_M = rank(M)#indirect_det(submatrix_M)
     
     # compare rank of A and M just once
     ranks = (rank_A == rank_M)
@@ -369,7 +371,8 @@ class Gauss(object):
         '''
         self.matrix = matrix
         # read input file with unknown dimension of an augmented matrix (A)
-        self.aug_matrix, self.cols = load_matrix(self.matrix)
+        self.aug_matrix, self.cols = self.matrix, len(self.matrix[0])
+        #self.aug_matrix, self.cols = load_matrix(self.matrix)
         self.memory_aug_matrix = copy.deepcopy(self.aug_matrix)
         return None
     
@@ -404,7 +407,7 @@ class Gauss(object):
         i, j = self.get_size()
         
         # verify solution
-        do_gauss, sys_type = solutionize(self.aug_matrix, i, j)
+        do_gauss, sys_type = True, solutionize(self.aug_matrix, i, j)
         
         # do echelon
         if do_gauss:
