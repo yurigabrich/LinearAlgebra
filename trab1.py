@@ -214,27 +214,22 @@ def rank(matrix):
 
     Returns: the rank of a matrix (integer).
     '''
-    
     submatrices, n = squares(matrix)
-    print(n)
-    #If the determinant of at least one of the sub-matrices is non-zero, we already found the rank.
-    #In other words:  if det != 0 (False) /--> rank = n
     
-    is_det_zero = False
-    
-    for submatrix in submatrices:
-        is_det_zero = is_det_zero or indirect_det(submatrix)
-        print(submatrix, is_det_zero)
-    print(is_det_zero, n)
-    
-    if not is_det_zero:
-        return n
-    elif n == 1:
+    if n == 1:
         return 1
-    #else:
-    # Ainda falta determinar a parada.
-    #    for submatrix in submatrices:
-    #        rank(submatrix)
+    else:
+        #If the determinant of at least one of the sub-matrices is non-zero, we already found the rank.
+        #In other words:  if det != 0 (False) /--> rank = n
+        is_det_zero = True
+        
+        for submatrix in submatrices:
+            is_det_zero = is_det_zero and indirect_det(submatrix)
+            if not is_det_zero:
+                return n
+            
+        for submatrix in submatrices:
+            return rank(submatrix)
 ########################################################################################################        
         
 def solutionize(matrix, i, j):
