@@ -2,7 +2,7 @@
 Created on Wed Jan 18 11:30:52 2017
 
 Trabalho 1 - Álgebra Linear
-Prof. Zochil Arenas
+Prof. Cristiane Faria
 Auno: Yuri Bastos Gabrich
 '''
 
@@ -148,43 +148,46 @@ def squares(matrix):
         return combinations(matrix, n), n
 
 
-def catch_zeros(submatrix, dim):
+def catch_zeros(submatrix, n):
     '''
-    Looks for null, equal or proportional rows in ONE matrix.
+    Looks for null or proportional rows in ONE matrix.
     
     - submatrix = biggest square submatrix
-    - dim = dimension of the square submatrix
+    - n = dimension of the square submatrix
 
     Returns: boolean statement indicating if the determinant will be zero.
     '''
-    for k in range(dim):
-        # look for null rows
+    # look for null rows
+    for k in range(n):
         count_zero = submatrix[k].count(0)
-        if count_zero == dim:
+        if count_zero == n:
             # det = 0 DETECTED!
             return True
-            
-        for s in range(k+1, dim):
-            # look for equal rows
-            if submatrix[k] == submatrix[s]:
-                # det = 0 DETECTED!
-                return True
-            
-            # look for ratio number between rows to avoid zero division:
-            max_element = max(submatrix[s])
-            index = submatrix[s].index(max_element)
-            ratio = submatrix[k][index] % submatrix[s][index]
-            remainder = 0
-            
-            for t in range(dim):
-                # if one element is multiple of another
-                if (submatrix[k][t] == ratio * submatrix[s][t]):
-                    remainder += 1
-            
-            if remainder == dim:
-                # det = 0 DETECTED!
-                return True
     
+    # look for proportional rows
+    for k in range(n-1):        
+        # Choosing the greatest number between the first positions on the pair comparison.
+        # Always dividing by the greatest element, to avoid division by zero.
+        if (submatrix[k+1][0] == 0) and (submatrix[k][0] == 0):
+            # The ratio is zero and the following analyzes must be the whole row equal to zero.
+            # This condition must be found on the previous loop.
+            # So we can finish this loop here with det != 0. Because we are analyzing only rows, the cols analysis is made in another calling.
+            return False
+        elif submatrix[k+1][0] > submatrix[k][0]:
+            ratio = submatrix[k][0]/submatrix[k+1][0]
+        else:
+            ratio = submatrix[k+1][0]/submatrix[k][0]
+        
+        count_similars = 1 # because of ratio
+        
+        for i in range(1,n):
+            if submatrix[k+1][i] == (ratio * submatrix[k][i]):
+                count_similars += 1
+        
+        if count_similars == n:
+            # det = 0 DETECTED!
+            return True
+        
     return False # det != 0
     
 
