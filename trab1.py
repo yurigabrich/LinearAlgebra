@@ -1,11 +1,3 @@
-'''
-Created on Wed Jan 18 11:30:52 2017
-
-Trabalho 1 - Álgebra Linear
-Prof. Cristiane Faria
-Auno: Yuri Bastos Gabrich
-'''
-
 import copy
 
 def load_matrix(file_name):
@@ -46,7 +38,7 @@ def load_matrix(file_name):
         # end of load_matrix, if everything is right
         print('\n', 'Matrix', len(aug_matrix), 'x', cols, 'loaded.')
         in_file.close()
-        return aug_matrix#, cols
+        return aug_matrix, cols
         
     except IndexError:
         missed_element = {} # dictionary{ cols: rows }
@@ -132,20 +124,24 @@ def combinations(matrix, n):
     return submatrices
    
 
-def squares(matrix):
+def squares(matrix, order):
     '''
     Check if the matrix is square and returns a list of list with all
-    square submatrices with the highest order.
+    square submatrices with the highest order (check rank function to udnerstand 'order' behavior).
     
     matrix (list of list of floats): matrix organized by rows
     '''
-    # checking if it is a square matrix
-    if len(matrix) == len(matrix[0]):
-        return [matrix], len(matrix)
+    if order == -1:
+		# checking if it is a square matrix
+        if len(matrix) == len(matrix[0]):
+            return [matrix], len(matrix)
+        else:
+		    # looking for the highest number of square submatrices we can get
+            n = min(len(matrix),len(matrix[0]))
+            return combinations(matrix, n), n
     else:
-        # looking for the highest number of square submatrices we can get
-        n = min(len(matrix),len(matrix[0]))
-        return combinations(matrix, n), n
+        return combinations(matrix, order), order
+
 
 
 def catch_zeros(submatrix, n):
@@ -175,14 +171,20 @@ def catch_zeros(submatrix, n):
             return False
         elif submatrix[k+1][0] > submatrix[k][0]:
             ratio = submatrix[k][0]/submatrix[k+1][0]
+            
+            count_similars = 1 # because of ratio
+			
+            for i in range(1,n):
+                if submatrix[k][i] == (ratio * submatrix[k+1][i]):
+                     count_similars += 1
         else:
             ratio = submatrix[k+1][0]/submatrix[k][0]
-        
-        count_similars = 1 # because of ratio
-        
-        for i in range(1,n):
-            if submatrix[k+1][i] == (ratio * submatrix[k][i]):
-                count_similars += 1
+        	
+            count_similars = 1 # because of ratio
+		    
+            for i in range(1,n):
+                if submatrix[k+1][i] == (ratio * submatrix[k][i]):
+                    count_similars += 1
         
         if count_similars == n:
             # det = 0 DETECTED!
@@ -210,30 +212,37 @@ def indirect_det(submatrix):
     
     return (check_rows or check_cols)
 
-########################################################################################################
-def rank(matrix):
+
+def rank(matrix, order = -1):
     '''
     Identify the rank of a matrix analyzing the determinants of its submatrices.
+	
+	The variable 'order' is used to get a new set of submatrices based
+	on a specific desired order. Mainly, because in case of square matrix
+	equal to own submatrix can causes an infinite recursive loop.
 
     Returns: the rank of a matrix (integer).
     '''
-    submatrices, n = squares(matrix)
     
+    submatrices, n = squares(matrix, order)
+
     if n == 1:
-        return 1
-    else:
-        #If the determinant of at least one of the sub-matrices is non-zero, we already found the rank.
-        #In other words:  if det != 0 (False) /--> rank = n
-        is_det_zero = True
+    	return 1
+
+    # If the determinant of at least one of the sub-matrices is non-zero, we already found the rank.
+    # In other words:  if det != 0 (False) /--> rank = n
+    
+    is_det_zero = True
+    
+    for submatrix in submatrices:
+        is_det_zero = is_det_zero and indirect_det(submatrix)
         
-        for submatrix in submatrices:
-            is_det_zero = is_det_zero and indirect_det(submatrix)
-            if not is_det_zero:
-                return n
-            
-        for submatrix in submatrices:
-            return rank(submatrix)
-########################################################################################################        
+        if not is_det_zero:
+            return n
+        else:
+            # if the first loop didn't return anything, it's time to iterate inside each submatrix
+            return rank(submatrix, n-1)
+
         
 def solutionize(matrix, i, j):
     '''
@@ -251,13 +260,11 @@ def solutionize(matrix, i, j):
         A.append(matrix[k][:-1])
         
     # Get the rank(A) by determinant
-    #submatrix_A = squares(A)
-    rank_A = rank(A)#indirect_det(submatrix_A)
+    rank_A = rank(A)
     
     # Get the rank(M) by determinant
-    #submatrix_M = squares(matrix)
-    rank_M = rank(M)#indirect_det(submatrix_M)
-    
+    rank_M = rank(matrix)
+    print('\n rank(A) =', rank_A, 'e rank(M) =', rank_M)
     # compare rank of A and M just once
     ranks = (rank_A == rank_M)
     
@@ -368,9 +375,8 @@ class Gauss(object):
         Returns NOTHING!
         '''
         self.matrix = matrix
-        # read input file with unknown dimension of an augmented matrix (A)
-        self.aug_matrix, self.cols = self.matrix, len(self.matrix[0])
-        #self.aug_matrix, self.cols = load_matrix(self.matrix)
+        # read input file with unknown dimension of an augmented matrix (M)
+        self.aug_matrix, self.cols = load_matrix(self.matrix)
         self.memory_aug_matrix = copy.deepcopy(self.aug_matrix)
         return None
     
@@ -381,8 +387,8 @@ class Gauss(object):
         
         Returns: NOTHING! Only print the original matrix.
         '''
-        for x in range(len(self.memory_aug_matrix)):
-            print(self.memory_aug_matrix[x])
+        for rows in self.memory_aug_matrix:
+            print(20*' ', rows)
         return None
         
         
@@ -428,10 +434,17 @@ class Gauss(object):
                     variables_x.append(step_matrix[k-1][k-1])    
             
             # printing final solution
-            print("", sys_type, "=", variables_x)
-            print("echelon form:")
-            for x in range(len(step_matrix)):
-                print(step_matrix[x])
+            print("", sys_type, "=", "{", end=" ")
+            for elem in variables_x:
+                print("%.2f"%(elem), end=" ")
+                if(elem != variables_x[-1]):print(end="; ")
+            print('}')
+            print('\n', "echelon form:")
+            for rows in step_matrix:
+                print(13*' ', '[', end=" ")
+                for elem in rows:
+                    print("%.2f"%(elem), end=" ")
+                print(']')
         
         else:
             print("", sys_type)
@@ -447,6 +460,7 @@ M = 'matrix_SPD.txt'
 #M = 'matrix_SI_2.txt'
 #M = 'matrix_grande_cheia.txt'
 #M = 'matrix_grande_vazia.txt'
+
 
 test = Gauss(M)
 test.get_initial_matrix()
