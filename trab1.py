@@ -239,9 +239,10 @@ def rank(matrix, order = -1):
         
         if not is_det_zero:
             return n
-        else:
-            # if the first loop didn't return anything, it's time to iterate inside each submatrix
-            return rank(submatrix, n-1)
+	
+    # if the first loop didn't return anything, it's time to iterate inside each submatrix
+    for submatrix in submatrices:
+    	return rank(submatrix, n-1)
 
         
 def solutionize(matrix, i, j):
