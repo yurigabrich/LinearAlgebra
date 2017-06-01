@@ -1,7 +1,6 @@
 def text2wolfram(input_text):
     '''
-    Convert a matrix structure as text to
-    WolframAlpha sintax.
+    Convert a matrix structured as text to WolframAlpha syntax.
     '''
     
     output = '{{'
