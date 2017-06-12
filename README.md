@@ -14,6 +14,6 @@
 - Trabalho 4
 
 ---
-### Hands-on
+### Handy
 
 - [Python list format to Wolfram matrix format](https://goo.gl/6rhXtM)
