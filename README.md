@@ -16,4 +16,4 @@
 ---
 ### Hands-on
 
-- [Python list format to Wolfram matrix format](https://goo.gl/GwtGHK)
+- [Python list format to Wolfram matrix format](https://goo.gl/6rhXtM)
