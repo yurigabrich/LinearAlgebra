@@ -2,16 +2,12 @@
 
   Repositório dos algoritmos da disciplina de Álgebra Linear do primeiro semestre do mestrado em ciências computacionais na UERJ.
   
-- [Trabalho 1](https://github.com/yurigabrich/LinearAlgebra/blob/master/trab1.py)
+- [Trabalho 1](https://github.com/yurigabrich/LinearAlgebra/tree/master/T1)
 
+- [Trabalho 2](https://github.com/yurigabrich/LinearAlgebra/tree/master/T2)
 
-- Trabalho 2
+- [Trabalho 3](https://github.com/yurigabrich/LinearAlgebra/tree/master/T4)
 
-
-- Trabalho 3
-
-
-- Trabalho 4
 
 ---
 ### Handy
