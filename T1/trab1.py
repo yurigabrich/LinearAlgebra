@@ -1,11 +1,3 @@
-'''
-Created on Wed Jan 18 11:30:52 2017
-
-Trabalho 1 - Álgebra Linear
-Prof. Zochil Arenas
-Auno: Yuri Bastos Gabrich
-'''
-
 import copy
 
 def load_matrix(file_name):
