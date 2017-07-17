@@ -6,7 +6,7 @@
 
 - [Trabalho 2](https://github.com/yurigabrich/LinearAlgebra/tree/master/T2)
 
-- [Trabalho 3](https://github.com/yurigabrich/LinearAlgebra/tree/master/T4)
+- [Trabalho 3](https://github.com/yurigabrich/LinearAlgebra/tree/master/T3)
 
 
 ---
