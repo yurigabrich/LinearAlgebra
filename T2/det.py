@@ -2,7 +2,7 @@ import copy as c
 
 def combinations(matrix, arrangement):
     '''
-    Fix row 1..
+    
     '''
     submatrices = c.deepcopy(matrix[1:])
     
@@ -27,13 +27,13 @@ def det(matrix):
         
     #else --> recursive until n == 2 :: do cofactor method
     submatrices = combinations(matrix, n-1)
-    
+    dets = det(submatrices)
     result = 0
     for k in range(n):
-        cofactor = (-1)**(k) * det(submatrices)
+        cofactor = (-1)**(k) * dets
         result += (matrix[0][k] * cofactor)
     return result
     
 #--------------------------------------------------
 matrix = [[1,0,5,0],[2,-1,0,3],[3,0,2,0],[7,0,6,5]]
-print(det(matrix))
+print(det(matrix)) #65
