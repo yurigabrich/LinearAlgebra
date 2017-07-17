@@ -11,43 +11,60 @@ def inner_prod(v1, v2):
     return result
 
 
-def ortog(beta):
+def proj(v2, v1):
     '''
-    Makes the orthogonality base of a set of vectors.
+    Makes the projection of v2 in v1.
     '''
-    if type(beta[0]) != list:
-        result = c.deepcopy(beta) #v1_ = v1
-    else:
-        result = c.deepcopy(beta[-1]) #vn_
+    div = inner_prod(v2,v1) / inner_prod(v1,v1)
+    v2_ = []
+    for k in v2:
+        v2_.append(div * k)
+    return v2_
+
     
-        for n in range(len(beta)-1, 0, -1):
-            vn = beta[n]
-            vn_1_ = ortog(beta[n-1])
-            frac = inner_prod(vn, vn_1_) / inner_prod(vn_1_, vn_1_)
-            
-            for k in range(len(result)):
-                result[k] -= (frac * vn_1_[k])
-                result[k] = round(result[k], 2)
+def orthog(v, ref):
+    '''
+    Makes the orthogonality between a vector and its reference (projection).
+    '''
+    if len(ref) == 0: # or v == ref == ref[0]
+        return v
+    # else
+    v_ = c.deepcopy(v)
+    for k in range(len(ref)-1, -1, -1):
+        x = proj(v, orthog(ref[-1], ref[0:k]))
         
-    return result
+        for i in range(len(v)):
+            v_[i] -= x[i]
+    
+    return v_
     
 
 def GramSchimdt(beta):
     '''
     Makes Gram-Schimdt process.
     '''
-    Try:
-        return ortog(beta) #still missing  orthonormalising a set of vectors
-    Except:
+    try:
+        ort = [c.deepcopy(beta[0])]
+        for k in range(len(beta)-1, 0, -1):
+            ort.append(orthog(beta[k], beta[0:k]))
+        
+        # orthonormalising
+        norm = c.deepcopy(ort)
+        for j in norm:
+            mod = (inner_prod(j,j))**0.5
+            for i in range(len(j)):
+                j[i] = round(j[i]/mod,2)
+            
+        return norm
+    except:
         print("Something wrong with the size of your input vectors.")
 
 
-%---------------------------------------
+#---------------------------------------
+#columns
 v1 = [2,5,8]
 v2 = [3,6,9]
 v3 = [4,7,10]
 
 beta = [v1, v2, v3]
-print(ortog(beta))
-
-https://goo.gl/ONDBXL
+print(GramSchimdt(beta))
