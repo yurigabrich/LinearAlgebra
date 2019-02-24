@@ -1,3 +1,11 @@
+# _________________________________________________________________
+# SPDX-License-Identifier: MIT License
+# For more information check at: https://spdx.org/licenses/MIT.html
+# 
+# Copyright (C) 2017
+# Yuri Bastos Gabrich <yuribgabrich[at]gmail.com>
+# _________________________________________________________________
+
 def echelon(aug_matrix, i, j, stop = False):
     '''
     Does the echelon of a matrix of n-size, recursively.
