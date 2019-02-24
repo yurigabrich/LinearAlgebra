@@ -15,7 +15,7 @@ SPDX-License-Identifier: [MIT License](https://github.com/yurigabrich/LinearAlge
 
 ## Como contribuir
 
-`to be done`
+A submissão de qualquer alteração ao presente trabalho é bem-vinda, no entanto é necessário estar de acordo com o Contrato de Contribuição descrito pelo [Developer's Certificate of Origin (DCO)](https://www.developercertificate.org/).
 
 ---
 ## Handy
