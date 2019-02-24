@@ -20,4 +20,4 @@ A submissão de qualquer alteração ao presente trabalho é bem-vinda, no entan
 ---
 ## Handy
 
-- [Python list format to Wolfram matrix format](https://goo.gl/6rhXtM)
+- [Python list format to Wolfram matrix format](https://goo.gl/CZhGfj)
