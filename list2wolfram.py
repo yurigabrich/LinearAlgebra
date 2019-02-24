@@ -1,3 +1,11 @@
+# _________________________________________________________________
+# SPDX-License-Identifier: MIT License
+# For more information check at: https://spdx.org/licenses/MIT.html
+# 
+# Copyright (C) 2017
+# Yuri Bastos Gabrich <yuribgabrich[at]gmail.com>
+# _________________________________________________________________
+
 def list2wolfram(input_list):
     '''
     Convert a matrix structured as list of list to WolframAlpha syntax.
