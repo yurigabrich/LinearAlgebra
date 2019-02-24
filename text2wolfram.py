@@ -1,3 +1,11 @@
+# _________________________________________________________________
+# SPDX-License-Identifier: MIT License
+# For more information check at: https://spdx.org/licenses/MIT.html
+# 
+# Copyright (C) 2017
+# Yuri Bastos Gabrich <yuribgabrich[at]gmail.com>
+# _________________________________________________________________
+
 def text2wolfram(input_text):
     '''
     Convert a matrix structured as text to WolframAlpha syntax.
