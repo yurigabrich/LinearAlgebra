@@ -9,7 +9,15 @@
 - [Trabalho 3](https://github.com/yurigabrich/LinearAlgebra/tree/master/T3)
 
 
+## Licença
+
+SPDX-License-Identifier: [MIT License](https://github.com/yurigabrich/LinearAlgebra/blob/master/LICENSE)
+
+## Como contribuir
+
+`to be done`
+
 ---
-### Handy
+## Handy
 
 - [Python list format to Wolfram matrix format](https://goo.gl/6rhXtM)
